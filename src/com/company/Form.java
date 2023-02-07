@@ -1,6 +1,7 @@
 package com.company;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -10,10 +11,7 @@ public class Form extends JDialog {
             { "Мука"  , "кг", "4.0", "" },
             { "Молоко", "л" , "2.2", "" }};
 
-    private Object[] columnsHeader = new String[] {"Верхняя граница интегрирования ", "граница интегрирования",
-            "Шаг интегрирования", "Результат"};
-
-    private JPanel contentPane;
+    private JPanel rootPanel;
     private JButton buttonOK;
     private JButton buttonCancel;
 
@@ -27,16 +25,27 @@ public class Form extends JDialog {
     private JTable table1;
 
     public Form() {
-        setContentPane(contentPane);
+        setContentPane(rootPanel);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
+
+        createTable();
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 addButton.setVisible(false); //это я просто смотрю, че как работает!!!
                 buttonOK.setBackground(Color.red);
-                //table1.addColumn(); //?
+//                table1.addColumn(); //?
                 input1.setEditable(false); // гыг
+            }
+        });
+
+        delButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addButton.setVisible(true); //это я просто смотрю, че как работает!!!
+                buttonOK.setBackground(Color.green);
+//                table1.addColumn(); //?
+                input1.setEditable(true); // гыг
             }
         });
 
@@ -61,7 +70,7 @@ public class Form extends JDialog {
         });
 
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
+        rootPanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
@@ -83,6 +92,23 @@ public class Form extends JDialog {
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
+    }
+//    public JPanel getRootPanel(){
+//        return rootPanel;
+//    }
+//
+    private void createTable(){
+        Object[][] data = {
+                {"f", "f", "d", "f"},
+                {"f", "d", "f", "f"},
+                {"d", "f", "f", "f"}
+        };
+        table1.setModel(new DefaultTableModel(
+                data,
+                new String[]{
+                        "Верхняя граница интегрирования ", "Нижняя граница интегрирования",
+                        "Шаг интегрирования", "Результат"}
+        ));
     }
 
 }
