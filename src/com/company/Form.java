@@ -7,10 +7,6 @@ import java.awt.event.*;
 
 public class Form extends JDialog {
 
-    private Object[][] array = new String[][] {{ "Сахар" , "кг", "1.5", "" },
-            { "Мука"  , "кг", "4.0", "" },
-            { "Молоко", "л" , "2.2", "" }};
-
     private JPanel rootPanel;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -33,21 +29,24 @@ public class Form extends JDialog {
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                addButton.setVisible(false); //это я просто смотрю, че как работает!!!
-                buttonOK.setBackground(Color.red);
-//                table1.addColumn(); //?
-                input1.setEditable(false); // гыг
+                DefaultTableModel model = (DefaultTableModel)table1.getModel();
+                model.addRow(new Object[]{input1.getText(), input2.getText(), input3.getText()});
             }
         });
 
         delButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                addButton.setVisible(true); //это я просто смотрю, че как работает!!!
-                buttonOK.setBackground(Color.green);
-//                table1.addColumn(); //?
-                input1.setEditable(true); // гыг
+                DefaultTableModel model = (DefaultTableModel)table1.getModel();
+                model.removeRow(table1.getSelectedRow());
             }
         });
+
+        calkButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                //heeeelp
+            }
+        });
+
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -98,13 +97,13 @@ public class Form extends JDialog {
 //    }
 //
     private void createTable(){
-        Object[][] data = {
-                {"f", "f", "d", "f"},
-                {"f", "d", "f", "f"},
-                {"d", "f", "f", "f"}
-        };
+//        Object[][] data = {
+//                {"f", "f", "d", "f"},
+//                {"f", "d", "f", "f"},
+//                {"d", "f", "f", "f"}
+//        };
         table1.setModel(new DefaultTableModel(
-                data,
+                null,
                 new String[]{
                         "Верхняя граница интегрирования ", "Нижняя граница интегрирования",
                         "Шаг интегрирования", "Результат"}
