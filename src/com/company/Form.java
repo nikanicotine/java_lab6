@@ -1,26 +1,44 @@
 package com.company;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
-public class Dialog extends JDialog {
+public class Form extends JDialog {
+
+    private Object[][] array = new String[][] {{ "Сахар" , "кг", "1.5", "" },
+            { "Мука"  , "кг", "4.0", "" },
+            { "Молоко", "л" , "2.2", "" }};
+
+    private Object[] columnsHeader = new String[] {"Верхняя граница интегрирования ", "граница интегрирования",
+            "Шаг интегрирования", "Результат"};
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JTextField textField1;
-    private JTextField textField2;
-    private JTextField textField3;
-    private JTable table1;
-    private JButton добавитьButton;
-    private JButton удалитьButton;
-    private JButton вычислитьButton;
-    private JTextArea textArea1;
 
-    public Dialog() {
+    private JButton addButton;
+    private JButton delButton;
+    private JButton calkButton;
+
+    private JTextField input1;
+    private JTextField input2;
+    private JTextField input3;
+    private JTable table1;
+
+    public Form() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addButton.setVisible(false); //это я просто смотрю, че как работает!!!
+                buttonOK.setBackground(Color.red);
+                //table1.addColumn(); //?
+                input1.setEditable(false); // гыг
+            }
+        });
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -61,9 +79,10 @@ public class Dialog extends JDialog {
     }
 
     public static void main(String[] args) {
-        Dialog dialog = new Dialog();
+        Form dialog = new Form();
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
     }
+
 }
