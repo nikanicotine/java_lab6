@@ -2,7 +2,6 @@ package com.company;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 import java.awt.event.*;
 
 public class Form extends JDialog {
@@ -27,23 +26,71 @@ public class Form extends JDialog {
 
         createTable();
 
+
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                DefaultTableModel model = (DefaultTableModel)table1.getModel();
-                model.addRow(new Object[]{input1.getText(), input2.getText(), input3.getText()});
+                double limUp, limDown, step, result;
+                String str_limUp, str_limDown, str_step;
+                str_limUp = input1.getText();
+                str_limDown = input2.getText();
+                str_step = input3.getText();
+
+//                try {
+//                    limUp = Double.parseDouble(str_limUp); // было limUp = Double.valueOf(str_limUp);
+//                    limDown = Double.parseDouble(str_limDown);
+//                    step = Double.parseDouble(str_step);
+//                } catch (Exception e) {
+//                    ShowMsg(e.toString());
+//                    return;
+//                }
+
+//                boolean swapAB = false;
+//                if (limUp > limDown) {
+//                    swapAB = true;
+//                    double tmp = limUp;
+//                    limUp = limDown;
+//                    limDown = tmp;
+//                }
+//                double sumInt = CalcInt(limUp, limDown, step);
+//
+//                if (swapAB == true) {
+//                    sumInt = -sumInt;
+//                }
+//                String str_sumInt = String.valueOf(sumInt);
+
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                model.addRow(new Object[]{str_limUp, str_limDown, str_step});
+                Refresh();
+                //
             }
         });
 
         delButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                DefaultTableModel model = (DefaultTableModel)table1.getModel();
-                model.removeRow(table1.getSelectedRow());
+                int SelectedRow = table1.getSelectedRow(); //а почему инт
+                int RowCount = table1.getRowCount();
+
+                if (SelectedRow == -1) {
+                    ShowMsg();
+                    return;
+                }
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                model.removeRow(SelectedRow);
+                // поясни пж
+                table1.setModel(model);
+                if (SelectedRow == RowCount - 1) {
+                    table1.changeSelection(SelectedRow - 1, 0, false, false);
+                } else {
+                    table1.changeSelection(SelectedRow, 0, false, false);
+                }
+                Refresh();
             }
         });
 
         calkButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 //heeeelp
+
             }
         });
 
@@ -86,17 +133,11 @@ public class Form extends JDialog {
         dispose();
     }
 
-    public static void main(String[] args) {
-        Form dialog = new Form();
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
-    }
-//    public JPanel getRootPanel(){
+    //    public JPanel getRootPanel(){
 //        return rootPanel;
 //    }
 //
-    private void createTable(){
+    private void createTable() {
 //        Object[][] data = {
 //                {"f", "f", "d", "f"},
 //                {"f", "d", "f", "f"},
@@ -108,6 +149,36 @@ public class Form extends JDialog {
                         "Верхняя граница интегрирования ", "Нижняя граница интегрирования",
                         "Шаг интегрирования", "Результат"}
         ));
+    }
+
+//    private double CalcInt(double limUp, double limDown, double step) {
+//        double i, value, sumInt;
+//        sumInt = 0;
+//        for (i = limUp; i<limDown; i += step)
+//        {
+//            value = (i + step) / 2;
+//            sumInt += Math.exp(-value) * step;
+//        }
+//
+//        return sumInt;
+//    }
+
+
+    private void ShowMsg() { // я снова хз, но так понимаю, что окошко
+        this.setVisible(true);
+        JOptionPane.showMessageDialog(null, "Не выбрана строка в таблице ");
+        this.setVisible(true);
+    }
+
+    private void Refresh() {
+        this.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        Form dialog = new Form();
+        dialog.pack();
+        dialog.setVisible(true);
+        System.exit(0);
     }
 
 }
