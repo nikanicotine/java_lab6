@@ -26,23 +26,22 @@ public class Form extends JDialog {
 
         createTable();
 
-
         addButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent ae) {
                 double limUp, limDown, step, result;
                 String str_limUp, str_limDown, str_step;
                 str_limUp = input1.getText();
                 str_limDown = input2.getText();
                 str_step = input3.getText();
 
-//                try {
-//                    limUp = Double.parseDouble(str_limUp); // было limUp = Double.valueOf(str_limUp);
-//                    limDown = Double.parseDouble(str_limDown);
-//                    step = Double.parseDouble(str_step);
-//                } catch (Exception e) {
-//                    ShowMsg(e.toString());
-//                    return;
-//                }
+                try {
+                    limUp = Double.parseDouble(str_limUp);
+                    limDown = Double.parseDouble(str_limDown);
+                    step = Double.parseDouble(str_step);
+                } catch (Exception e) {
+                    ShowMsg("Введено некорректное значение");
+                    return;
+                }
 
 //                boolean swapAB = false;
 //                if (limUp > limDown) {
@@ -51,12 +50,12 @@ public class Form extends JDialog {
 //                    limUp = limDown;
 //                    limDown = tmp;
 //                }
-//                double sumInt = CalcInt(limUp, limDown, step);
+                double sumInt = CalcInt(limUp, limDown, step);
 //
 //                if (swapAB == true) {
 //                    sumInt = -sumInt;
 //                }
-//                String str_sumInt = String.valueOf(sumInt);
+                String str_sumInt = String.valueOf(sumInt);
 
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 model.addRow(new Object[]{str_limUp, str_limDown, str_step});
@@ -67,11 +66,11 @@ public class Form extends JDialog {
 
         delButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int SelectedRow = table1.getSelectedRow(); //а почему инт
+                int SelectedRow = table1.getSelectedRow();
                 int RowCount = table1.getRowCount();
 
                 if (SelectedRow == -1) {
-                    ShowMsg();
+                    ShowMsg("Не выбрана строка в таблице ");
                     return;
                 }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
@@ -138,35 +137,35 @@ public class Form extends JDialog {
 //    }
 //
     private void createTable() {
-//        Object[][] data = {
-//                {"f", "f", "d", "f"},
-//                {"f", "d", "f", "f"},
-//                {"d", "f", "f", "f"}
-//        };
+
         table1.setModel(new DefaultTableModel(
                 null,
                 new String[]{
                         "Верхняя граница интегрирования ", "Нижняя граница интегрирования",
                         "Шаг интегрирования", "Результат"}
-        ));
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column != 3;
+            }
+        });
     }
 
-//    private double CalcInt(double limUp, double limDown, double step) {
-//        double i, value, sumInt;
-//        sumInt = 0;
-//        for (i = limUp; i<limDown; i += step)
-//        {
-//            value = (i + step) / 2;
-//            sumInt += Math.exp(-value) * step;
-//        }
-//
-//        return sumInt;
-//    }
+    private double CalcInt(double limUp, double limDown, double step) {
+        double i, value, sumInt;
+        sumInt = 0;
+        for (i = limUp; i < limDown; i += step) {
+            value = (i + step) / 2;
+            sumInt += Math.exp(-value) * step;
+        }
+
+        return sumInt;
+    }
 
 
-    private void ShowMsg() { // я снова хз, но так понимаю, что окошко
+    private void ShowMsg(String s) {
         this.setVisible(true);
-        JOptionPane.showMessageDialog(null, "Не выбрана строка в таблице ");
+        JOptionPane.showMessageDialog(null, s);
         this.setVisible(true);
     }
 
