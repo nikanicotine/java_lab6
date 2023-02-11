@@ -28,7 +28,7 @@ public class Form extends JDialog {
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                double limUp, limDown, step, result;
+                double limUp, limDown, step;
                 String str_limUp, str_limDown, str_step;
                 str_limUp = input1.getText();
                 str_limDown = input2.getText();
@@ -43,24 +43,9 @@ public class Form extends JDialog {
                     return;
                 }
 
-//                boolean swapAB = false;
-//                if (limUp > limDown) {
-//                    swapAB = true;
-//                    double tmp = limUp;
-//                    limUp = limDown;
-//                    limDown = tmp;
-//                }
-                double sumInt = CalcInt(limUp, limDown, step);
-//
-//                if (swapAB == true) {
-//                    sumInt = -sumInt;
-//                }
-                String str_sumInt = String.valueOf(sumInt);
-
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 model.addRow(new Object[]{str_limUp, str_limDown, str_step});
-                Refresh();
-                //
+                UpdateWindow();
             }
         });
 
@@ -75,21 +60,31 @@ public class Form extends JDialog {
                 }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 model.removeRow(SelectedRow);
-                // поясни пж
                 table1.setModel(model);
                 if (SelectedRow == RowCount - 1) {
                     table1.changeSelection(SelectedRow - 1, 0, false, false);
                 } else {
                     table1.changeSelection(SelectedRow, 0, false, false);
                 }
-                Refresh();
+                UpdateWindow();
             }
         });
 
         calkButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                //heeeelp
-
+                int row = table1.getSelectedRow();
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                double limUp = Double.parseDouble((String) model.getValueAt(row, 0));
+                double limDown = Double.parseDouble((String) model.getValueAt(row, 1));
+                double Step = Double.parseDouble((String) model.getValueAt(row, 2));
+                double sum = 0;
+                while (limDown+Step<limUp) {
+                    sum += ((Math.exp(-limDown) + Math.exp(-(limDown+Step)))/2)*Step;
+                    limDown += Step;
+                }
+                sum += ((Math.exp(-limDown) + Math.exp(-limUp))/2)*Step;
+                model.setValueAt(sum, row, 3);
+                UpdateWindow();
             }
         });
 
@@ -132,10 +127,6 @@ public class Form extends JDialog {
         dispose();
     }
 
-    //    public JPanel getRootPanel(){
-//        return rootPanel;
-//    }
-//
     private void createTable() {
 
         table1.setModel(new DefaultTableModel(
@@ -151,25 +142,13 @@ public class Form extends JDialog {
         });
     }
 
-    private double CalcInt(double limUp, double limDown, double step) {
-        double i, value, sumInt;
-        sumInt = 0;
-        for (i = limUp; i < limDown; i += step) {
-            value = (i + step) / 2;
-            sumInt += Math.exp(-value) * step;
-        }
-
-        return sumInt;
-    }
-
-
     private void ShowMsg(String s) {
         this.setVisible(true);
         JOptionPane.showMessageDialog(null, s);
         this.setVisible(true);
     }
 
-    private void Refresh() {
+    private void UpdateWindow() {
         this.setVisible(true);
     }
 
