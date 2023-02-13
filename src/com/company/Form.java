@@ -45,6 +45,9 @@ public class Form extends JDialog {
 
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 model.addRow(new Object[]{str_limUp, str_limDown, str_step});
+                input1.setText("");
+                input2.setText("");
+                input3.setText("");
                 UpdateWindow();
             }
         });
