@@ -113,9 +113,9 @@ public class Form extends JDialog {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 RecIntegral temp;
 
-                for(int i = 0; i < listA.size(); i++) {
-                    temp = listA.get(i);
-                    model.addRow(new Object[]{temp.Upper, temp.Lower, temp.Step}))
+                for (RecIntegral recIntegral : listA) {
+                    temp = recIntegral;
+                    model.addRow(new Object[]{temp.Upper, temp.Lower, temp.Step});
                 }
                 UpdateWindow();
             }
