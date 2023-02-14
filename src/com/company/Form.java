@@ -3,6 +3,7 @@ package com.company;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
+import java.util.*;
 
 public class Form extends JDialog {
 
@@ -13,11 +14,19 @@ public class Form extends JDialog {
     private JButton addButton;
     private JButton delButton;
     private JButton calkButton;
+    private JButton clearButton;
+    private JButton fillButton;
 
     private JTextField input1;
     private JTextField input2;
     private JTextField input3;
     private JTable table1;
+
+    class RecIntegral{
+        double Upper, Lower, Step;
+    }
+
+    List<RecIntegral> listA = new ArrayList();
 
     public Form() {
         setContentPane(rootPanel);
@@ -45,9 +54,16 @@ public class Form extends JDialog {
 
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 model.addRow(new Object[]{str_limUp, str_limDown, str_step});
+                RecIntegral temp = new RecIntegral();
+                temp.Upper = Double.parseDouble(str_limUp);
+                temp.Lower = Double.parseDouble(str_limDown);
+                temp.Step = Double.parseDouble(str_step);
+                listA.add(temp);
                 input1.setText("");
                 input2.setText("");
                 input3.setText("");
+
+
                 UpdateWindow();
             }
         });
@@ -62,6 +78,7 @@ public class Form extends JDialog {
                     return;
                 }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                listA.remove(listA.lastIndexOf(SelectedRow));
                 model.removeRow(SelectedRow);
                 table1.setModel(model);
                 if (SelectedRow == RowCount - 1) {
@@ -91,6 +108,29 @@ public class Form extends JDialog {
             }
         });
 
+        fillButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                RecIntegral temp;
+
+                for(int i = 0; i < listA.size(); i++) {
+                    temp = listA.get(i);
+                    model.addRow(new Object[]{temp.Upper, temp.Lower, temp.Step}))
+                }
+                UpdateWindow();
+            }
+        });
+
+        clearButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                int rowCount = model.getRowCount();
+                for(int i = 0; i < rowCount; i++) {
+                    model.removeRow(i);
+                }
+                UpdateWindow();
+            }
+        });
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
