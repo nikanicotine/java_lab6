@@ -22,8 +22,8 @@ public class Form extends JDialog {
     private JTextField input3;
     private JTable table1;
 
-    class RecIntegral{
-        double Upper, Lower, Step;
+    static class RecIntegral {
+        String Upper, Lower, Step;
     }
 
     List<RecIntegral> listA = new ArrayList();
@@ -55,15 +55,13 @@ public class Form extends JDialog {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 model.addRow(new Object[]{str_limUp, str_limDown, str_step});
                 RecIntegral temp = new RecIntegral();
-                temp.Upper = Double.parseDouble(str_limUp);
-                temp.Lower = Double.parseDouble(str_limDown);
-                temp.Step = Double.parseDouble(str_step);
+                temp.Upper = str_limUp;
+                temp.Lower = str_limDown;
+                temp.Step = str_step;
                 listA.add(temp);
                 input1.setText("");
                 input2.setText("");
                 input3.setText("");
-
-
                 UpdateWindow();
             }
         });
@@ -78,7 +76,7 @@ public class Form extends JDialog {
                     return;
                 }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                listA.remove(listA.lastIndexOf(SelectedRow));
+                listA.remove(SelectedRow);
                 model.removeRow(SelectedRow);
                 table1.setModel(model);
                 if (SelectedRow == RowCount - 1) {
@@ -98,11 +96,11 @@ public class Form extends JDialog {
                 double limDown = Double.parseDouble((String) model.getValueAt(row, 1));
                 double Step = Double.parseDouble((String) model.getValueAt(row, 2));
                 double sum = 0;
-                while (limDown+Step<limUp) {
-                    sum += ((Math.exp(-limDown) + Math.exp(-(limDown+Step)))/2)*Step;
+                while (limDown + Step < limUp) {
+                    sum += ((Math.exp(-limDown) + Math.exp(-(limDown + Step))) / 2) * Step;
                     limDown += Step;
                 }
-                sum += ((Math.exp(-limDown) + Math.exp(-limUp))/2)*Step;
+                sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * Step;
                 model.setValueAt(sum, row, 3);
                 UpdateWindow();
             }
@@ -117,6 +115,7 @@ public class Form extends JDialog {
                     temp = recIntegral;
                     model.addRow(new Object[]{temp.Upper, temp.Lower, temp.Step});
                 }
+                listA.addAll(listA);
                 UpdateWindow();
             }
         });
@@ -124,9 +123,8 @@ public class Form extends JDialog {
         clearButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                int rowCount = model.getRowCount();
-                for(int i = 0; i < rowCount; i++) {
-                    model.removeRow(i);
+                while (model.getRowCount() != 0) {
+                    model.removeRow(0);
                 }
                 UpdateWindow();
             }
