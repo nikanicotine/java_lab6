@@ -63,6 +63,15 @@ public class Form extends JDialog {
         }
     }
 
+    static class MyException extends Exception {
+        String msg;
+
+        MyException(String code) {
+            msg = code;
+        }
+    }
+
+
     List<RecIntegral> listA = new ArrayList();
 
     public Form() {
@@ -74,7 +83,7 @@ public class Form extends JDialog {
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                double limUp, limDown, step;
+                double limUp, limDown;
                 String str_limUp, str_limDown, str_step;
                 str_limUp = input1.getText();
                 str_limDown = input2.getText();
@@ -83,14 +92,21 @@ public class Form extends JDialog {
                 try {
                     limUp = Double.parseDouble(str_limUp);
                     limDown = Double.parseDouble(str_limDown);
-                    step = Double.parseDouble(str_step);
+                    if (limUp < 0.000001 || limUp > 100000)
+                        throw new MyException("Неверное значение верхнего предела");
+
+                    else if (limDown < 0.000001 || limDown > 100000)
+                        throw new MyException("Неверное значение нижнего предела");
+
+                } catch (MyException e) {
+                    ShowMsg(e.msg);
+                    return;
                 } catch (Exception e) {
-                    ShowMsg("Введено некорректное значение");
+                    ShowMsg("Некорректно введены данные");
                     return;
                 }
-
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                model.addRow(new Object[]{model.getRowCount()+1, str_limUp, str_limDown, str_step});
+                model.addRow(new Object[]{model.getRowCount() + 1, str_limUp, str_limDown, str_step});
                 RecIntegral temp = new RecIntegral();
                 temp.setUpper(str_limUp);
                 temp.setLower(str_limDown);
@@ -105,13 +121,17 @@ public class Form extends JDialog {
 
         delButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int SelectedRow = table1.getSelectedRow();
-                int RowCount = table1.getRowCount();
-
-                if (SelectedRow == -1) {
+                int SelectedRow;
+                try {
+                    SelectedRow = table1.getSelectedRow();
+                    if (SelectedRow == -1)
+                        throw new Exception();
+                } catch (Exception e1) {
                     ShowMsg("Не выбрана строка в таблице ");
                     return;
                 }
+                int RowCount = table1.getRowCount();
+
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 listA.remove(SelectedRow);
                 model.removeRow(SelectedRow);
@@ -127,7 +147,15 @@ public class Form extends JDialog {
 
         calkButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int row = table1.getSelectedRow();
+                int row;
+                try {
+                    row = table1.getSelectedRow();
+                    if (row == -1)
+                        throw new Exception();
+                } catch (Exception e1) {
+                    ShowMsg("Не выбрана строка в таблице ");
+                    return;
+                }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 RecIntegral temp = listA.get(row);
                 double sum = temp.Calk();
@@ -138,12 +166,13 @@ public class Form extends JDialog {
 
         fillButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 RecIntegral temp;
 
                 for (RecIntegral recIntegral : listA) {
                     temp = recIntegral;
-                    model.addRow(new Object[]{model.getRowCount()+1, recIntegral.getUpper(), recIntegral.getLower(), recIntegral.getStep()});
+                    model.addRow(new Object[]{model.getRowCount() + 1, recIntegral.getUpper(), recIntegral.getLower(), recIntegral.getStep()});
                 }
                 listA.addAll(listA);
                 UpdateWindow();
@@ -152,6 +181,13 @@ public class Form extends JDialog {
 
         clearButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                try {
+                    if (table1.getRowCount() == 0)
+                        throw new Exception();
+                } catch (Exception e1) {
+                    ShowMsg("Таблица пуста");
+                    return;
+                }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 while (model.getRowCount() != 0) {
                     model.removeRow(0);
@@ -174,6 +210,7 @@ public class Form extends JDialog {
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
