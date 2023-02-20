@@ -22,8 +22,45 @@ public class Form extends JDialog {
     private JTextField input3;
     private JTable table1;
 
-    static class RecIntegral {
+    class RecIntegral {
         String Upper, Lower, Step;
+
+        String getUpper() {
+            return Upper;
+        }
+
+        String getLower() {
+            return Lower;
+        }
+
+        String getStep() {
+            return Step;
+        }
+
+        void setUpper(String Temp) {
+            Upper = Temp;
+        }
+
+        void setLower(String Temp) {
+            Lower = Temp;
+        }
+
+        void setStep(String Temp) {
+            this.Step = Temp;
+        }
+
+        double Calk() {
+            double sum = 0;
+            double limUp = Double.parseDouble(Upper);
+            double limDown = Double.parseDouble(Lower);
+            double limStep = Double.parseDouble(Step);
+            while (limDown + limStep < limUp) {
+                sum += ((Math.exp(-limDown) + Math.exp(-(limDown + limStep))) / 2) * limStep;
+                limDown += limStep;
+            }
+            sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * limStep;
+            return sum;
+        }
     }
 
     List<RecIntegral> listA = new ArrayList();
@@ -53,11 +90,11 @@ public class Form extends JDialog {
                 }
 
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                model.addRow(new Object[]{str_limUp, str_limDown, str_step});
+                model.addRow(new Object[]{model.getRowCount()+1, str_limUp, str_limDown, str_step});
                 RecIntegral temp = new RecIntegral();
-                temp.Upper = str_limUp;
-                temp.Lower = str_limDown;
-                temp.Step = str_step;
+                temp.setUpper(str_limUp);
+                temp.setLower(str_limDown);
+                temp.setStep(str_step);
                 listA.add(temp);
                 input1.setText("");
                 input2.setText("");
@@ -92,16 +129,9 @@ public class Form extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 int row = table1.getSelectedRow();
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                double limUp = Double.parseDouble((String) model.getValueAt(row, 0));
-                double limDown = Double.parseDouble((String) model.getValueAt(row, 1));
-                double Step = Double.parseDouble((String) model.getValueAt(row, 2));
-                double sum = 0;
-                while (limDown + Step < limUp) {
-                    sum += ((Math.exp(-limDown) + Math.exp(-(limDown + Step))) / 2) * Step;
-                    limDown += Step;
-                }
-                sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * Step;
-                model.setValueAt(sum, row, 3);
+                RecIntegral temp = listA.get(row);
+                double sum = temp.Calk();
+                model.setValueAt(sum, row, 4);
                 UpdateWindow();
             }
         });
@@ -113,7 +143,7 @@ public class Form extends JDialog {
 
                 for (RecIntegral recIntegral : listA) {
                     temp = recIntegral;
-                    model.addRow(new Object[]{temp.Upper, temp.Lower, temp.Step});
+                    model.addRow(new Object[]{model.getRowCount()+1, recIntegral.getUpper(), recIntegral.getLower(), recIntegral.getStep()});
                 }
                 listA.addAll(listA);
                 UpdateWindow();
@@ -173,12 +203,12 @@ public class Form extends JDialog {
         table1.setModel(new DefaultTableModel(
                 null,
                 new String[]{
-                        "Верхняя граница интегрирования ", "Нижняя граница интегрирования",
+                        "#", "Верхняя граница интегрирования", "Нижняя граница интегрирования",
                         "Шаг интегрирования", "Результат"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column != 3;
+                return column != 4;
             }
         });
     }
