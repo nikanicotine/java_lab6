@@ -83,7 +83,7 @@ public class Form extends JDialog {
 
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                double limUp, limDown;
+                double limUp, limDown, step;
                 String str_limUp, str_limDown, str_step;
                 str_limUp = input1.getText();
                 str_limDown = input2.getText();
@@ -92,11 +92,16 @@ public class Form extends JDialog {
                 try {
                     limUp = Double.parseDouble(str_limUp);
                     limDown = Double.parseDouble(str_limDown);
+                    step = Double.parseDouble(str_step);
                     if (limUp < 0.000001 || limUp > 100000)
                         throw new MyException("Неверное значение верхнего предела");
 
                     else if (limDown < 0.000001 || limDown > 100000)
                         throw new MyException("Неверное значение нижнего предела");
+                    else if (limDown>limUp)
+                        throw new MyException("Нижний предел должен быть меньше верхнего");
+                    else if ((limUp-limDown)<step)
+                        throw new MyException("Шаг должен быть меньше интервала интегрирования");
 
                 } catch (MyException e) {
                     ShowMsg(e.msg);
