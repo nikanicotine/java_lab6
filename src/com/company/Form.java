@@ -21,6 +21,10 @@ public class Form extends JDialog {
     private JTextField input2;
     private JTextField input3;
     private JTable table1;
+    private JButton saveBButton;
+    private JButton saveTButton;
+    private JButton loadTButton;
+    private JButton loadBButton;
 
     class RecIntegral {
         String Upper, Lower, Step;
@@ -98,9 +102,9 @@ public class Form extends JDialog {
 
                     else if (limDown < 0.000001 || limDown > 100000)
                         throw new MyException("Неверное значение нижнего предела");
-                    else if (limDown>limUp)
+                    else if (limDown > limUp)
                         throw new MyException("Нижний предел должен быть меньше верхнего");
-                    else if ((limUp-limDown)<step)
+                    else if ((limUp - limDown) < step)
                         throw new MyException("Шаг должен быть меньше интервала интегрирования");
 
                 } catch (MyException e) {
@@ -198,6 +202,34 @@ public class Form extends JDialog {
                     model.removeRow(0);
                 }
                 UpdateWindow();
+            }
+        });
+
+        saveTButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+                fc.showSaveDialog(null);
+            }
+        });
+
+        saveBButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+                fc.showSaveDialog(null);
+            }
+        });
+
+        loadTButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+//                fc.showOpenDialog();
+            }
+        });
+
+        loadBButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+//                fc.showOpenDialog();
             }
         });
 
