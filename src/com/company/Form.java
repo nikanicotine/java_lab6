@@ -3,9 +3,7 @@ package com.company;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class Form extends JDialog {
@@ -30,7 +28,7 @@ public class Form extends JDialog {
     private JButton loadBButton;
 
     class RecIntegral {
-        String Upper, Lower, Step;
+        String Upper, Lower, Step, Result;
 
         String getUpper() {
             return Upper;
@@ -44,16 +42,31 @@ public class Form extends JDialog {
             return Step;
         }
 
+        String getResult() {
+            return Result;
+        }
+
         void setUpper(String Temp) {
-            Upper = Temp;
+            this.Upper = Temp;
         }
 
         void setLower(String Temp) {
-            Lower = Temp;
+            this.Lower = Temp;
         }
 
         void setStep(String Temp) {
             this.Step = Temp;
+        }
+
+        void setResult(String Temp) {
+            this.Result = Temp;
+        }
+
+        void setAll(String Temp1, String Temp2, String Temp3, String Temp4){
+            this.setUpper(Temp1);
+            this.setLower(Temp2);
+            this.setStep(Temp3);
+            this.setResult(Temp4);
         }
     }
 
@@ -123,6 +136,7 @@ public class Form extends JDialog {
                 temp.setStep(str_step);
 
                 double sum = Calk(str_limUp, str_limDown, str_step);
+                temp.setResult(Double.toString(sum));
                 model.addRow(new Object[]{model.getRowCount() + 1, str_limUp, str_limDown, str_step, sum});
 
                 listA.add(temp);
@@ -173,6 +187,8 @@ public class Form extends JDialog {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 RecIntegral temp = listA.get(row);
                 double sum = Calk(temp.getUpper(), temp.getLower(), temp.getStep());
+                temp.setResult(Double.toString(sum));
+                listA.set(row,temp);
                 model.setValueAt(sum, row, 4);
                 UpdateWindow();
             }
@@ -186,7 +202,7 @@ public class Form extends JDialog {
 
                 for (RecIntegral recIntegral : listA) {
                     temp = recIntegral;
-                    model.addRow(new Object[]{model.getRowCount() + 1, recIntegral.getUpper(), recIntegral.getLower(), recIntegral.getStep()});
+                    model.addRow(new Object[]{model.getRowCount() + 1, recIntegral.getUpper(), recIntegral.getLower(), recIntegral.getStep(), recIntegral.getResult()});
                 }
                 listA.addAll(listA);
                 UpdateWindow();
@@ -221,19 +237,17 @@ public class Form extends JDialog {
                     DefaultTableModel model = (DefaultTableModel) table1.getModel();
                     int row = model.getRowCount();
                     int col = model.getColumnCount();
-                    double temp;
 
                     FileWriter fw = new FileWriter(f);
-//                    for (int i = 0; i < row; i++) {
-//                        for (int j = 0; j < col; j++) {
-//                            temp = Double.parseDouble(model.getValueAt(i, j));
-//                            fw.write(temp);
-//                            fw.write(" ");
-//                        }
-//                        fw.write("\n");
-//                    }
+                    for (int i = 0; i < row; i++) {
+                        for (int j = 0; j < col; j++) {
+                            fw.write(model.getValueAt(i, j).toString());
+                            fw.write(" ");
+                        }
+                        fw.write("\n");
+                    }
                     fw.close();
-
+                    ShowMsg("Сохранение прошло успешно");
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -251,7 +265,28 @@ public class Form extends JDialog {
         loadTButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
-//                fc.showOpenDialog();
+                fc.showOpenDialog(null);
+                File f = fc.getSelectedFile();
+                try {
+                    DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                    FileReader fr = new FileReader(f);
+                    BufferedReader reader = new BufferedReader(fr);
+                    String line;
+                    String[] split;
+                    RecIntegral temp = new RecIntegral();
+                    listA.clear();
+                    while((line = reader.readLine()) != null) {
+                        split = line.split(" ");
+                        model.addRow(new Object[]{model.getRowCount() + 1, split[1], split[2], split[3], split[4]});
+                        temp.setAll(split[1], split[2], split[3], split[4]);
+                        listA.add(temp);
+                    }
+                    reader.close();
+                    fr.close();
+                    ShowMsg("Загрузка прошла успешно");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             }
         });
 
