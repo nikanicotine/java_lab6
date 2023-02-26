@@ -3,6 +3,9 @@ package com.company;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Form extends JDialog {
@@ -52,19 +55,6 @@ public class Form extends JDialog {
         void setStep(String Temp) {
             this.Step = Temp;
         }
-
-        double Calk() {
-            double sum = 0;
-            double limUp = Double.parseDouble(Upper);
-            double limDown = Double.parseDouble(Lower);
-            double limStep = Double.parseDouble(Step);
-            while (limDown + limStep < limUp) {
-                sum += ((Math.exp(-limDown) + Math.exp(-(limDown + limStep))) / 2) * limStep;
-                limDown += limStep;
-            }
-            sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * limStep;
-            return sum;
-        }
     }
 
     static class MyException extends Exception {
@@ -75,6 +65,18 @@ public class Form extends JDialog {
         }
     }
 
+    public double Calk(String Upper, String Lower, String Step) {
+        double sum = 0;
+        double limUp = Double.parseDouble(Upper);
+        double limDown = Double.parseDouble(Lower);
+        double limStep = Double.parseDouble(Step);
+        while (limDown + limStep < limUp) {
+            sum += ((Math.exp(-limDown) + Math.exp(-(limDown + limStep))) / 2) * limStep;
+            limDown += limStep;
+        }
+        sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * limStep;
+        return sum;
+    }
 
     List<RecIntegral> listA = new ArrayList();
 
@@ -115,11 +117,14 @@ public class Form extends JDialog {
                     return;
                 }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                model.addRow(new Object[]{model.getRowCount() + 1, str_limUp, str_limDown, str_step});
                 RecIntegral temp = new RecIntegral();
                 temp.setUpper(str_limUp);
                 temp.setLower(str_limDown);
                 temp.setStep(str_step);
+
+                double sum = Calk(str_limUp, str_limDown, str_step);
+                model.addRow(new Object[]{model.getRowCount() + 1, str_limUp, str_limDown, str_step, sum});
+
                 listA.add(temp);
                 input1.setText("");
                 input2.setText("");
@@ -167,7 +172,7 @@ public class Form extends JDialog {
                 }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 RecIntegral temp = listA.get(row);
-                double sum = temp.Calk();
+                double sum = Calk(temp.getUpper(), temp.getLower(), temp.getStep());
                 model.setValueAt(sum, row, 4);
                 UpdateWindow();
             }
@@ -208,13 +213,37 @@ public class Form extends JDialog {
         saveTButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
+                fc.setDialogTitle("Сохранение в текстовом виде");
                 fc.showSaveDialog(null);
+                File f = fc.getSelectedFile();
+
+                try {
+                    DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                    int row = model.getRowCount();
+                    int col = model.getColumnCount();
+                    double temp;
+
+                    FileWriter fw = new FileWriter(f);
+//                    for (int i = 0; i < row; i++) {
+//                        for (int j = 0; j < col; j++) {
+//                            temp = Double.parseDouble(model.getValueAt(i, j));
+//                            fw.write(temp);
+//                            fw.write(" ");
+//                        }
+//                        fw.write("\n");
+//                    }
+                    fw.close();
+
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             }
         });
 
         saveBButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
+                fc.setDialogTitle("Сохранение в двоичном виде");
                 fc.showSaveDialog(null);
             }
         });
