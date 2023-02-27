@@ -1,6 +1,7 @@
 package com.company;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.*;
 import java.io.*;
@@ -27,7 +28,7 @@ public class Form extends JDialog {
     private JButton loadTButton;
     private JButton loadBButton;
 
-    class RecIntegral {
+    class RecIntegral implements Serializable{
         String Upper, Lower, Step, Result;
 
         String getUpper() {
@@ -62,11 +63,11 @@ public class Form extends JDialog {
             this.Result = Temp;
         }
 
-        void setAll(String Temp1, String Temp2, String Temp3, String Temp4){
-            this.setUpper(Temp1);
-            this.setLower(Temp2);
-            this.setStep(Temp3);
-            this.setResult(Temp4);
+        void setAll(String limUp, String limDown, String step, String result){
+            this.setUpper(limUp);
+            this.setLower(limDown);
+            this.setStep(step);
+            this.setResult(result);
         }
     }
 
@@ -230,6 +231,7 @@ public class Form extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
                 fc.setDialogTitle("Сохранение в текстовом виде");
+                fc.setFileFilter(new FileNameExtensionFilter("Text Files","txt" ));
                 fc.showSaveDialog(null);
                 File f = fc.getSelectedFile();
 
@@ -250,6 +252,7 @@ public class Form extends JDialog {
                     ShowMsg("Сохранение прошло успешно");
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
+                    ShowMsg("Ошибка при сохранении");
                 }
             }
         });
@@ -258,13 +261,36 @@ public class Form extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
                 fc.setDialogTitle("Сохранение в двоичном виде");
+                fc.setFileFilter(new FileNameExtensionFilter("Binary Files","bin" ));
                 fc.showSaveDialog(null);
+                File f = fc.getSelectedFile();
+                ArrayList <String> arr = new ArrayList<String>();
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                int row = model.getRowCount();
+                int col = model.getColumnCount();
+
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < col; j++) {
+                        arr.add(model.getValueAt(i,j).toString());
+                    }
+                }
+
+                try(ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f))))
+                {
+                    oos.writeObject(arr);
+                    oos.close();
+                    ShowMsg("Сохранение прошло успешно");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                    ShowMsg("Ошибка при сохранении");
+                }
             }
         });
 
         loadTButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
+                fc.setFileFilter(new FileNameExtensionFilter("Text Files","txt" ));
                 fc.showOpenDialog(null);
                 File f = fc.getSelectedFile();
                 try {
@@ -275,6 +301,8 @@ public class Form extends JDialog {
                     String[] split;
                     RecIntegral temp = new RecIntegral();
                     listA.clear();
+                    while(model.getRowCount()!=0)
+                        model.removeRow(0);
                     while((line = reader.readLine()) != null) {
                         split = line.split(" ");
                         model.addRow(new Object[]{model.getRowCount() + 1, split[1], split[2], split[3], split[4]});
@@ -284,8 +312,10 @@ public class Form extends JDialog {
                     reader.close();
                     fr.close();
                     ShowMsg("Загрузка прошла успешно");
+                    UpdateWindow();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
+                    ShowMsg("Ошибка при загрузке");
                 }
             }
         });
@@ -293,7 +323,29 @@ public class Form extends JDialog {
         loadBButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
-//                fc.showOpenDialog();
+                fc.setFileFilter(new FileNameExtensionFilter("Binary Files","bin" ));
+                fc.showOpenDialog(null);
+                File f = fc.getSelectedFile();
+                try {
+                    DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream( new FileInputStream(f)));
+                    ArrayList <String> arr = (ArrayList<String>)ois.readObject();
+                    ois.close();
+                    listA.clear();
+                    while(model.getRowCount()!=0)
+                        model.removeRow(0);
+                    for (int i=0;i<arr.size();i+=5) {
+                        RecIntegral recint = new RecIntegral();
+                        recint.setAll(arr.get(i+1), arr.get(i+2), arr.get(i+3), arr.get(i+4));
+                        model.addRow(new Object[]{model.getRowCount() + 1, arr.get(i+1), arr.get(i+2), arr.get(i+3), arr.get(i+4)});
+                        listA.add(recint);
+                    }
+                    ShowMsg("Загрузка прошла успешно");
+                    UpdateWindow();
+                } catch (IOException | ClassNotFoundException ioException) {
+                    ioException.printStackTrace();
+                    ShowMsg("Ошибка при загрузке");
+                }
             }
         });
 
