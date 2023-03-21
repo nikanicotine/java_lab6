@@ -28,6 +28,39 @@ public class Form extends JDialog {
     private JButton loadTButton;
     private JButton loadBButton;
 
+    class MyThread extends Thread{
+        private String Upper;
+        private String Lower;
+        private String Step;
+        private int numb;
+        private RecIntegral temp;
+        private DefaultTableModel model;
+        MyThread(){}
+        public void setFields(String Upper, String Lower, String Step, int numb, RecIntegral temp, DefaultTableModel model){
+            this.Upper = Upper;
+            this.Lower = Lower;
+            this.Step  = Step;
+            this.numb =  numb;
+            this.temp =  temp;
+            this.model = model;
+        }
+        public void run() //Этот метод будет выполняться в побочном потоке
+        {
+            double sum =0;
+            double limUp = Double.parseDouble(Upper);
+            double limDown = Double.parseDouble(Lower);
+            double limStep = Double.parseDouble(Step);
+            while (limDown + limStep < limUp) {
+                sum += ((Math.exp(-limDown) + Math.exp(-(limDown + limStep))) / 2) * limStep;
+                limDown += limStep;
+            }
+            sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * limStep;
+            temp.setResult(Double.toString(sum));
+            listA.set(numb, temp);
+            model.setValueAt(sum, numb, 4);
+        }
+    }
+
     class RecIntegral implements Serializable{
         String Upper, Lower, Step, Result;
 
@@ -79,18 +112,9 @@ public class Form extends JDialog {
         }
     }
 
-    public double Calk(String Upper, String Lower, String Step) {
-        double sum = 0;
-        double limUp = Double.parseDouble(Upper);
-        double limDown = Double.parseDouble(Lower);
-        double limStep = Double.parseDouble(Step);
-        while (limDown + limStep < limUp) {
-            sum += ((Math.exp(-limDown) + Math.exp(-(limDown + limStep))) / 2) * limStep;
-            limDown += limStep;
-        }
-        sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * limStep;
-        return sum;
-    }
+//    public double Calk(String Upper, String Lower, String Step) {
+//
+//    }
 
     List<RecIntegral> listA = new ArrayList();
 
@@ -136,9 +160,9 @@ public class Form extends JDialog {
                 temp.setLower(str_limDown);
                 temp.setStep(str_step);
 
-                double sum = Calk(str_limUp, str_limDown, str_step);
-                temp.setResult(Double.toString(sum));
-                model.addRow(new Object[]{model.getRowCount() + 1, str_limUp, str_limDown, str_step, sum});
+                //double sum = Calk(str_limUp, str_limDown, str_step);
+                //temp.setResult(Double.toString(sum));
+                model.addRow(new Object[]{model.getRowCount() + 1, str_limUp, str_limDown, str_step});
 
                 listA.add(temp);
                 input1.setText("");
@@ -176,21 +200,19 @@ public class Form extends JDialog {
 
         calkButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int row;
-                try {
-                    row = table1.getSelectedRow();
-                    if (row == -1)
-                        throw new Exception();
-                } catch (Exception e1) {
-                    ShowMsg("Не выбрана строка в таблице ");
-                    return;
-                }
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                RecIntegral temp = listA.get(row);
-                double sum = Calk(temp.getUpper(), temp.getLower(), temp.getStep());
-                temp.setResult(Double.toString(sum));
-                listA.set(row,temp);
-                model.setValueAt(sum, row, 4);
+                MyThread[] thread = new MyThread[5];
+                for (int i = 0; i < 5; i++)
+                {
+                    thread[i] = new MyThread();
+                }
+                //MyThread thread = new MyThread("forge");
+                for (int i= 0;i<model.getRowCount();i++) {
+                    RecIntegral temp = listA.get(i);
+                    thread[i%5].setFields(temp.getUpper(), temp.getLower(), temp.getStep(),i, temp, model);
+                    thread[i%5].start();
+
+                }
                 UpdateWindow();
             }
         });
