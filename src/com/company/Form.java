@@ -28,25 +28,28 @@ public class Form extends JDialog {
     private JButton loadTButton;
     private JButton loadBButton;
 
-    class MyThread extends Thread{
+    class MyThread extends Thread {
         private String Upper;
         private String Lower;
         private String Step;
         private int numb;
         private RecIntegral temp;
         private DefaultTableModel model;
+
         MyThread(){}
+
         public void setFields(String Upper, String Lower, String Step, int numb, RecIntegral temp, DefaultTableModel model){
             this.Upper = Upper;
             this.Lower = Lower;
-            this.Step  = Step;
-            this.numb =  numb;
-            this.temp =  temp;
+            this.Step = Step;
+            this.numb = numb;
+            this.temp = temp;
             this.model = model;
         }
+
         public void run() //Этот метод будет выполняться в побочном потоке
         {
-            double sum =0;
+            double sum = 0;
             double limUp = Double.parseDouble(Upper);
             double limDown = Double.parseDouble(Lower);
             double limStep = Double.parseDouble(Step);
@@ -61,7 +64,7 @@ public class Form extends JDialog {
         }
     }
 
-    class RecIntegral implements Serializable{
+    class RecIntegral implements Serializable {
         String Upper, Lower, Step, Result;
 
         String getUpper() {
@@ -96,7 +99,7 @@ public class Form extends JDialog {
             this.Result = Temp;
         }
 
-        void setAll(String limUp, String limDown, String step, String result){
+        void setAll(String limUp, String limDown, String step, String result) {
             this.setUpper(limUp);
             this.setLower(limDown);
             this.setStep(step);
@@ -111,10 +114,6 @@ public class Form extends JDialog {
             msg = code;
         }
     }
-
-//    public double Calk(String Upper, String Lower, String Step) {
-//
-//    }
 
     List<RecIntegral> listA = new ArrayList();
 
@@ -160,8 +159,6 @@ public class Form extends JDialog {
                 temp.setLower(str_limDown);
                 temp.setStep(str_step);
 
-                //double sum = Calk(str_limUp, str_limDown, str_step);
-                //temp.setResult(Double.toString(sum));
                 model.addRow(new Object[]{model.getRowCount() + 1, str_limUp, str_limDown, str_step});
 
                 listA.add(temp);
@@ -202,15 +199,14 @@ public class Form extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 MyThread[] thread = new MyThread[5];
-                for (int i = 0; i < 5; i++)
-                {
+                for (int i = 0; i < 5; i++) {
                     thread[i] = new MyThread();
                 }
-                //MyThread thread = new MyThread("forge");
-                for (int i= 0;i<model.getRowCount();i++) {
+
+                for (int i = 0; i < model.getRowCount(); i++) {
                     RecIntegral temp = listA.get(i);
-                    thread[i%5].setFields(temp.getUpper(), temp.getLower(), temp.getStep(),i, temp, model);
-                    thread[i%5].start();
+                    thread[i % 5].setFields(temp.getUpper(), temp.getLower(), temp.getStep(), i, temp, model);
+                    thread[i % 5].start();
 
                 }
                 UpdateWindow();
@@ -253,7 +249,7 @@ public class Form extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
                 fc.setDialogTitle("Сохранение в текстовом виде");
-                fc.setFileFilter(new FileNameExtensionFilter("Text Files","txt" ));
+                fc.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
                 fc.showSaveDialog(null);
                 File f = fc.getSelectedFile();
 
@@ -283,22 +279,21 @@ public class Form extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
                 fc.setDialogTitle("Сохранение в двоичном виде");
-                fc.setFileFilter(new FileNameExtensionFilter("Binary Files","bin" ));
+                fc.setFileFilter(new FileNameExtensionFilter("Binary Files", "bin"));
                 fc.showSaveDialog(null);
                 File f = fc.getSelectedFile();
-                ArrayList <String> arr = new ArrayList<String>();
+                ArrayList<String> arr = new ArrayList<String>();
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 int row = model.getRowCount();
                 int col = model.getColumnCount();
 
                 for (int i = 0; i < row; i++) {
                     for (int j = 0; j < col; j++) {
-                        arr.add(model.getValueAt(i,j).toString());
+                        arr.add(model.getValueAt(i, j).toString());
                     }
                 }
 
-                try(ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f))))
-                {
+                try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f)))) {
                     oos.writeObject(arr);
                     oos.close();
                     ShowMsg("Сохранение прошло успешно");
@@ -312,7 +307,7 @@ public class Form extends JDialog {
         loadTButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
-                fc.setFileFilter(new FileNameExtensionFilter("Text Files","txt" ));
+                fc.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
                 fc.showOpenDialog(null);
                 File f = fc.getSelectedFile();
                 try {
@@ -323,9 +318,9 @@ public class Form extends JDialog {
                     String[] split;
                     RecIntegral temp = new RecIntegral();
                     listA.clear();
-                    while(model.getRowCount()!=0)
+                    while (model.getRowCount() != 0)
                         model.removeRow(0);
-                    while((line = reader.readLine()) != null) {
+                    while ((line = reader.readLine()) != null) {
                         split = line.split(" ");
                         model.addRow(new Object[]{model.getRowCount() + 1, split[1], split[2], split[3], split[4]});
                         temp.setAll(split[1], split[2], split[3], split[4]);
@@ -345,21 +340,21 @@ public class Form extends JDialog {
         loadBButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fc = new JFileChooser();
-                fc.setFileFilter(new FileNameExtensionFilter("Binary Files","bin" ));
+                fc.setFileFilter(new FileNameExtensionFilter("Binary Files", "bin"));
                 fc.showOpenDialog(null);
                 File f = fc.getSelectedFile();
                 try {
                     DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream( new FileInputStream(f)));
-                    ArrayList <String> arr = (ArrayList<String>)ois.readObject();
+                    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
+                    ArrayList<String> arr = (ArrayList<String>) ois.readObject();
                     ois.close();
                     listA.clear();
-                    while(model.getRowCount()!=0)
+                    while (model.getRowCount() != 0)
                         model.removeRow(0);
-                    for (int i=0;i<arr.size();i+=5) {
+                    for (int i = 0; i < arr.size(); i += 5) {
                         RecIntegral recint = new RecIntegral();
-                        recint.setAll(arr.get(i+1), arr.get(i+2), arr.get(i+3), arr.get(i+4));
-                        model.addRow(new Object[]{model.getRowCount() + 1, arr.get(i+1), arr.get(i+2), arr.get(i+3), arr.get(i+4)});
+                        recint.setAll(arr.get(i + 1), arr.get(i + 2), arr.get(i + 3), arr.get(i + 4));
+                        model.addRow(new Object[]{model.getRowCount() + 1, arr.get(i + 1), arr.get(i + 2), arr.get(i + 3), arr.get(i + 4)});
                         listA.add(recint);
                     }
                     ShowMsg("Загрузка прошла успешно");
@@ -383,7 +378,6 @@ public class Form extends JDialog {
             }
         });
 
-        // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         addWindowListener(new WindowAdapter() {
@@ -392,7 +386,6 @@ public class Form extends JDialog {
             }
         });
 
-        // call onCancel() on ESCAPE
         rootPanel.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
@@ -401,12 +394,10 @@ public class Form extends JDialog {
     }
 
     private void onOK() {
-        // add your code here
         dispose();
     }
 
     private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
 
@@ -441,5 +432,4 @@ public class Form extends JDialog {
         dialog.setVisible(true);
         System.exit(0);
     }
-
 }
