@@ -3,9 +3,14 @@ package com.company;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Form extends JDialog {
 
@@ -29,38 +34,50 @@ public class Form extends JDialog {
     private JButton loadBButton;
 
     class MyThread extends Thread {
-        private String Upper;
-        private String Lower;
-        private String Step;
-        private int numb;
-        private RecIntegral temp;
-        private DefaultTableModel model;
+        int size;
 
-        MyThread(){}
-
-        public void setFields(String Upper, String Lower, String Step, int numb, RecIntegral temp, DefaultTableModel model){
-            this.Upper = Upper;
-            this.Lower = Lower;
-            this.Step = Step;
-            this.numb = numb;
-            this.temp = temp;
-            this.model = model;
+        MyThread(String name, int _size) {
+            super(name);
+            size = _size;
         }
 
-        public void run() //Этот метод будет выполняться в побочном потоке
-        {
-            double sum = 0;
-            double limUp = Double.parseDouble(Upper);
-            double limDown = Double.parseDouble(Lower);
-            double limStep = Double.parseDouble(Step);
-            while (limDown + limStep < limUp) {
-                sum += ((Math.exp(-limDown) + Math.exp(-(limDown + limStep))) / 2) * limStep;
-                limDown += limStep;
+        public void run() {
+            DefaultTableModel model = (DefaultTableModel) table1.getModel();
+            DatagramSocket dsocket = null;
+            try {
+                dsocket = new DatagramSocket(26);
+            } catch (SocketException ex) {
+                Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
             }
-            sum += ((Math.exp(-limDown) + Math.exp(-limUp)) / 2) * limStep;
-            temp.setResult(Double.toString(sum));
-            listA.set(numb, temp);
-            model.setValueAt(sum, numb, 4);
+
+            for (int i = 0; i < size; i++) {
+
+                byte[] buffer = new byte[256];
+                DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+                try {
+                    dsocket.receive(request);
+                    String Message = new String(request.getData(), 0, request.getLength());
+                    String Resoult = "",
+                            Num = "";
+
+                    int j = 0;
+                    while (Message.charAt(j) != ' ') {
+                        Resoult += Message.charAt(j);
+                        j++;
+                    }
+                    j++;
+
+
+                    while (j != Message.length()) {
+                        Num += Message.charAt(j);
+                        j++;
+                    }
+                    model.setValueAt(Float.parseFloat(Resoult), Integer.parseInt(Num), 3);
+                } catch (IOException ex) {
+                    Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            dsocket.close();
         }
     }
 
@@ -107,7 +124,7 @@ public class Form extends JDialog {
         }
     }
 
-    static class MyException extends Exception {
+    class MyException extends Exception {
         String msg;
 
         MyException(String code) {
@@ -117,7 +134,14 @@ public class Form extends JDialog {
 
     List<RecIntegral> listA = new ArrayList();
 
-    public Form() {
+    DatagramSocket socket;
+    InetAddress address;
+
+    public void Form() throws SocketException, UnknownHostException {
+
+        socket = new DatagramSocket();
+        address = InetAddress.getByName("localhost");
+
         setContentPane(rootPanel);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -198,15 +222,20 @@ public class Form extends JDialog {
         calkButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                MyThread[] thread = new MyThread[5];
-                for (int i = 0; i < 5; i++) {
-                    thread[i] = new MyThread();
-                }
-
-                for (int i = 0; i < model.getRowCount(); i++) {
-                    RecIntegral temp = listA.get(i);
-                    thread[i % 5].setFields(temp.getUpper(), temp.getLower(), temp.getStep(), i, temp, model);
-                    thread[i % 5].start();
+                Vector data = model.getDataVector();
+                MyThread thread = new MyThread("thread", data.size());
+                thread.start();
+                for (int i = 0; i < data.size(); i++) {
+                    byte[] buf;
+                    Vector CurrentData = (Vector) data.get(i);
+                    String message = String.valueOf((int) CurrentData.get(0)) + " " + String.valueOf((int) CurrentData.get(1)) + " " + String.valueOf((float) CurrentData.get(2)) + " " + String.valueOf(i);
+                    buf = message.getBytes();
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 17);
+                    try {
+                        socket.send(packet);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
                 }
                 UpdateWindow();
