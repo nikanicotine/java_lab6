@@ -72,7 +72,7 @@ public class Form extends JDialog {
                         Num += Message.charAt(j);
                         j++;
                     }
-                    model.setValueAt(Float.parseFloat(Resoult), Integer.parseInt(Num), 3);
+                    model.setValueAt(Float.parseFloat(Resoult), Integer.parseInt(Num), 4);
                 } catch (IOException ex) {
                     Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -137,7 +137,7 @@ public class Form extends JDialog {
     DatagramSocket socket;
     InetAddress address;
 
-    public void Form() throws SocketException, UnknownHostException {
+    public Form() throws SocketException, UnknownHostException {
 
         socket = new DatagramSocket();
         address = InetAddress.getByName("localhost");
@@ -228,7 +228,7 @@ public class Form extends JDialog {
                 for (int i = 0; i < data.size(); i++) {
                     byte[] buf;
                     Vector CurrentData = (Vector) data.get(i);
-                    String message = String.valueOf((int) CurrentData.get(0)) + " " + String.valueOf((int) CurrentData.get(1)) + " " + String.valueOf((float) CurrentData.get(2)) + " " + String.valueOf(i);
+                    String message = CurrentData.get(1) + " " + CurrentData.get(2) + " " + CurrentData.get(3) + " " + i;
                     buf = message.getBytes();
                     DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 17);
                     try {
@@ -455,7 +455,7 @@ public class Form extends JDialog {
         this.setVisible(true);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SocketException, UnknownHostException {
         Form dialog = new Form();
         dialog.pack();
         dialog.setVisible(true);
