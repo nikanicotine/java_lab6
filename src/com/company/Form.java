@@ -51,15 +51,12 @@ public class Form extends JDialog {
             }
 
             for (int i = 0; i < size; i++) {
-
                 byte[] buffer = new byte[256];
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 try {
                     dsocket.receive(request);
                     String Message = new String(request.getData(), 0, request.getLength());
-                    String Resoult = "",
-                            Num = "";
-
+                    String Resoult = "", Num = "";
                     int j = 0;
                     while (Message.charAt(j) != ' ') {
                         Resoult += Message.charAt(j);
@@ -67,12 +64,11 @@ public class Form extends JDialog {
                     }
                     j++;
 
-
                     while (j != Message.length()) {
                         Num += Message.charAt(j);
                         j++;
                     }
-                    model.setValueAt(Float.parseFloat(Resoult), Integer.parseInt(Num), 4);
+                    model.setValueAt(Double.parseDouble(Resoult), Integer.parseInt(Num), 4);
                 } catch (IOException ex) {
                     Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -224,7 +220,6 @@ public class Form extends JDialog {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 Vector data = model.getDataVector();
                 MyThread thread = new MyThread("thread", data.size());
-                thread.start();
                 for (int i = 0; i < data.size(); i++) {
                     byte[] buf;
                     Vector CurrentData = (Vector) data.get(i);
@@ -236,8 +231,8 @@ public class Form extends JDialog {
                     } catch (IOException ex) {
                         Logger.getLogger(Form.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
                 }
+                thread.start();
                 UpdateWindow();
             }
         });
